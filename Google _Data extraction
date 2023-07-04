@@ -1,0 +1,57 @@
+import requests
+import urllib
+import pandas as pd
+from requests_html import HTML
+from requests_html import HTMLSession
+def get_source(url):
+    """Return the source code for the provided URL.
+
+    Args:
+        url (string): URL of the page to scrape.
+
+    Returns:
+        response (object): HTTP response object from requests_html.
+    """
+
+    try:
+        # Create a new HTMLSession object to establish a session for making HTTP requests.
+        session = HTMLSession()
+         # Send a GET request to the provided URL and store the response in the 'response' variable.
+        response = session.get(url)
+        # Return the HTTP response object.
+        return response
+
+    except requests.exceptions.RequestException as e:
+        # If an exception occurs during the HTTP request, print the error message.
+        print(e)
+def scrape_google(query):
+
+    # Encode the query to make it safe for use in a URL.
+    query = urllib.parse.quote_plus(query)
+    # Get the source code of the Google search results page for the query.
+    response = get_source("https://www.google.co.uk/search?q=" + query)
+
+    # Extract all absolute links from the response HTML.
+    links = list(response.html.absolute_links)
+
+    # Define the Google domains to be filtered out from the extracted links.
+    google_domains = ('https://www.google.',
+                      'https://google.',
+                      'https://webcache.googleusercontent.',
+                      'http://webcache.googleusercontent.',
+                      'https://policies.google.',
+                      'https://support.google.',
+                      'https://maps.google.')
+
+    # Iterate over the links and remove those that start with any of the Google domains.
+    for url in links[:]:
+        if url.startswith(google_domains):
+            links.remove(url)
+
+    # Return the filtered list of links.
+    return links
+# Call the scrape_google function with the search query "Nidec"
+
+
+
+scrape_google("Nidec")
